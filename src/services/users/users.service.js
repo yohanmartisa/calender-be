@@ -65,7 +65,7 @@ const UsersService = (models) => {
     // setup query options
     let queryOptions = {
       ...(User.model.options.scopes.withFilter(opt.filter)),
-      attributes: { exclude: ['password'] },
+      attributes: ['id', 'name'],
       distinct: true
     };
     if (opt.pagination) {
@@ -111,7 +111,7 @@ const UsersService = (models) => {
    * @return {Object}
    *
    */
-  const storeUser = async (data, username) => {
+  const storeUser = async (data) => {
     const userData = { ...data };
     if (userData.password === null) {
       delete userData.password;
@@ -122,7 +122,7 @@ const UsersService = (models) => {
     // eslint-disable-next-line no-unused-vars
     let createdUser;
     try {
-      [createdUser] = await User.create(userData, { user: username, transaction });
+      [createdUser] = await User.create(userData, { transaction });
     } catch (err) {
       if (err.status === 422 && err.errors[0].path === 'username') {
         throw new UserAlreadyUsedError({ details: 'Login Name has been registered. Please contact administrator' });
@@ -134,7 +134,7 @@ const UsersService = (models) => {
     }
     transaction.commit();
 
-    return userData;
+    return createdUser;
   };
 
   /**

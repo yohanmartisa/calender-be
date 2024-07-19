@@ -114,10 +114,9 @@ const UsersController = usersService => ({
    */
   store: async (req, res, next) => {
     // get username from given token
-    const user = req.user ? req.user.username : null;
     try {
       // store user
-      await usersService.storeUser(req.body, user);
+      await usersService.storeUser(req.body);
       return res.sendStatus(httpStatus.NO_CONTENT);
     } catch (error) {
       return next(error);

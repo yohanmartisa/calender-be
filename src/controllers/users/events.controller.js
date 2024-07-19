@@ -30,10 +30,11 @@ const EventsController = eventsService => ({
       page: req.query.page,
       paginate: req.query.limit
     };
+    const { user } = req;
 
     try {
       // get all events
-      const results = await eventsService.getAllEvents({ filter, paginateFilter });
+      const results = await eventsService.getAllEvents({ filter, paginateFilter }, user);
       return res.send(results); // send OK
     } catch (error) {
       return next(error);
@@ -72,7 +73,7 @@ const EventsController = eventsService => ({
    */
   store: async (req, res, next) => {
     // get eventname from given token
-    const user = req.user ? req.user.username : null;
+    const { user } = req;
     try {
       // store event
       await eventsService.storeEvent(req.body, user);

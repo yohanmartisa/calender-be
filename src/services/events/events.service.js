@@ -1,5 +1,6 @@
 import merge from 'deepmerge';
 
+import { Op } from 'sequelize';
 import { getTimestampString } from '../../utils/controllers-helper';
 
 const EventsService = (models) => {
@@ -25,7 +26,7 @@ const EventsService = (models) => {
    * @return {Array}
    *
    */
-  const getAllEvents = async (options) => {
+  const getAllEvents = async (options, user) => {
     // merge options with default options
     const opt = options ? merge(defaultOptions, options) : defaultOptions;
 
@@ -34,7 +35,13 @@ const EventsService = (models) => {
     // setup query options
     let queryOptions = {
       attributes: ['id', 'title', 'description', 'person', 'start', 'end'],
-      distinct: true
+      distinct: true,
+      where: {
+        [Op.or]: {
+          created_by: user.username,
+          person: user.username
+        }
+      }
     };
     if (opt.pagination) {
       queryOptions = {
@@ -79,13 +86,15 @@ const EventsService = (models) => {
    * @return {Object}
    *
    */
-  const storeEvent = async (data, username) => {
+  const storeEvent = async (body, user) => {
     const transaction = await Event.sequelize.transaction();
 
     // eslint-disable-next-line no-unused-vars
     let createdUser;
+    // eslint-disable-next-line no-param-reassign
+    const data = body.map(elm => ({ ...elm, created_by: user.username }));
     try {
-      [createdUser] = await Event.create(data, { user: username, transaction });
+      [createdUser] = await Event.create(data, { user: user.username, transaction });
     } catch (err) {
       throw err;
     }

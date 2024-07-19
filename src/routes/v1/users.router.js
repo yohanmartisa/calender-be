@@ -58,8 +58,6 @@ router
 router
   .route(API_DEFAULTS.STORE)
   .post(
-    // TODO: add validation
-    passport.authenticate('jwt', { session: false }),
     controller.store
   );
 
